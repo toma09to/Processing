@@ -5,6 +5,7 @@ class Ship {
   float accelFactor, decelFactor;
   int chargeTime;
   int previousFireTime;
+  boolean isAlive;
   
   Ship(float posX, float posY, float rad) {
     this.posX = posX;
@@ -16,6 +17,7 @@ class Ship {
     this.decelFactor = 0.005;
     this.chargeTime = 500;
     this.previousFireTime = -this.chargeTime;
+    this.isAlive = true;
   }
   
   void render() {
@@ -75,20 +77,20 @@ class Ship {
     this.posX += this.speedX;
     this.posY += this.speedY;
 
-    if (this.posX > width + 30) {
-      this.posX -= width + 60;
-    } else if (this.posX < -30) {
-      this.posX += width + 60;
+    if (this.posX > width + 15) {
+      this.posX -= width + 30;
+    } else if (this.posX < -15) {
+      this.posX += width + 30;
     }
-    if (this.posY > height + 30) {
-      this.posY -= height + 60;
-    } else if (this.posY < -30) {
-      this.posY += height + 60;
+    if (this.posY > height + 15) {
+      this.posY -= height + 30;
+    } else if (this.posY < -15) {
+      this.posY += height + 30;
     }
   }
 
   boolean fire() {
-    boolean ret = (KeyState.get(DOWN) && millis() - this.previousFireTime > this.chargeTime);
+    boolean ret = (isAlive && KeyState.get(DOWN) && millis() - this.previousFireTime > this.chargeTime);
     if (ret) {
       this.previousFireTime = millis();
     }
@@ -101,5 +103,18 @@ class Ship {
 
   float headY() {
     return 15.0*-sin(this.rad) + this.posY;
+  }
+
+  void reset(float posX, float posY, float rad) {
+    this.posX = posX;
+    this.posY = posY;
+    this.rad = rad;
+    this.speedX = 0.0;
+    this.speedY = 0.0;
+    this.accelFactor = 0.03;
+    this.decelFactor = 0.005;
+    this.chargeTime = 500;
+    this.previousFireTime = -this.chargeTime;
+    this.isAlive = true;
   }
 }

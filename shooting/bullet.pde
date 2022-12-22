@@ -24,4 +24,8 @@ class Bullet {
   boolean isAlive() {
     return (this.posX >= -60 && this.posX <= width+60  && this.posY >= -60 && this.posY <= height+60);
   }
+
+  boolean isHit(float x, float y) {
+    return (pow(this.posX - x, 2) + pow(this.posY - y, 2) < pow(5.0, 2));
+  }
 }
