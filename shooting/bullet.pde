@@ -2,12 +2,14 @@ class Bullet {
   float posX, posY;
   float rad;
   float speed;
+  color bulletColor;
 
-  Bullet(float posX, float posY, float rad) {
+  Bullet(float posX, float posY, float rad, color col) {
     this.posX = posX;
     this.posY = posY;
     this.rad = rad;
     this.speed = 5.0;
+    this.bulletColor = col;
   }
 
   void move() {
@@ -16,9 +18,11 @@ class Bullet {
   }
 
   void render() {
-    fill(0, 255, 0);
-    ellipse(this.posX, this.posY, 3, 3);
+    noStroke();
+    fill(this.bulletColor);
+    ellipse(this.posX, this.posY, 5, 5);
     noFill();
+    stroke(green);
   }
     
   boolean isAlive() {
@@ -26,6 +30,6 @@ class Bullet {
   }
 
   boolean isHit(float x, float y) {
-    return (pow(this.posX - x, 2) + pow(this.posY - y, 2) < pow(5.0, 2));
+    return (pow(this.posX - x, 2) + pow(this.posY - y, 2) < pow(10.0, 2));
   }
 }

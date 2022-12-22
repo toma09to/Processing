@@ -6,8 +6,9 @@ class Ship {
   int chargeTime;
   int previousFireTime;
   boolean isAlive;
+  color shipColor;
   
-  Ship(float posX, float posY, float rad) {
+  Ship(float posX, float posY, float rad, color col) {
     this.posX = posX;
     this.posY = posY;
     this.rad = rad;
@@ -18,9 +19,11 @@ class Ship {
     this.chargeTime = 500;
     this.previousFireTime = -this.chargeTime;
     this.isAlive = true;
+    this.shipColor = col;
   }
   
   void render() {
+    stroke(this.shipColor);
     PVector[] frames = new PVector[4];
     frames[0] = new PVector(15.0,  0.0);
     frames[1] = new PVector(-15.0, 10.0);
@@ -52,6 +55,7 @@ class Ship {
         if (i % 2 == 1) endShape(CLOSE);
       }
     }
+    stroke(green);
   }
   
   void move() {
@@ -63,10 +67,10 @@ class Ship {
 
     // rotate
     if (KeyState.get(LEFT)) {
-      test.rad += 0.1;
+      this.rad += 0.1;
     }
     if (KeyState.get(RIGHT)) {
-      test.rad -= 0.1;
+      this.rad -= 0.1;
     }
 
     // deceleration

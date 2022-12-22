@@ -1,9 +1,11 @@
 boolean keyLeft, keyRight, keyUp, keyDown;
 PFont f;
-Ship test = new Ship(300, 300, PI/2);
+color green = color(0, 255, 0);
+color red = color(255, 0, 0);
+Ship test = new Ship(300, 300, PI/2, green);
 ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-boolean gameOver = false;
 int previousAliveTime = -1000;
+int previousAliveTime2 = -1000;
 int maxLives = 3;
 int lives;
 
@@ -22,7 +24,7 @@ void setup() {
 void draw() {
   background(0);
   if (test.fire()) {
-    bullets.add(new Bullet(test.headX(), test.headY(), test.rad));
+    bullets.add(new Bullet(test.headX(), test.headY(), test.rad, green));
   }
 
   for (int i = 0; i < bullets.size(); i++) {
@@ -39,16 +41,6 @@ void draw() {
     }
   }
 
-  if (test.isAlive) {
-    test.move();
-    test.render();
-    previousAliveTime = millis();
-  } else if (millis() - previousAliveTime > 1000) {
-    lives -= 1;
-    if (lives > 0) {
-      test.reset(300, 300, PI/2);
-    } else {
-      text("GAME OVER", 200, height/2);
-    }
-  } 
+  test.move();
+  test.render();
 }
