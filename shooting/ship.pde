@@ -43,6 +43,7 @@ class Ship {
       float coordY = (-frames[i].x*sin(this.rad) + frames[i].y*cos(this.rad)) + this.posY;
       vertex(coordX, coordY);
     }
+    ellipse(this.posX, this.posY, 10, 10);
     endShape(CLOSE);
 
     // draw flares
@@ -59,18 +60,20 @@ class Ship {
   }
   
   void move() {
-    // acceleration
-    if (KeyState.get(UP)) {
-      speedX += accelFactor*cos(this.rad);
-      speedY -= accelFactor*sin(this.rad);
-    }
-
-    // rotate
-    if (KeyState.get(LEFT)) {
-      this.rad += 0.1;
-    }
-    if (KeyState.get(RIGHT)) {
-      this.rad -= 0.1;
+    if (this.isAlive) {
+      // acceleration
+      if (KeyState.get(UP)) {
+        speedX += accelFactor*cos(this.rad);
+        speedY -= accelFactor*sin(this.rad);
+      }
+  
+      // rotate
+      if (KeyState.get(LEFT)) {
+        this.rad += 0.1;
+      }
+      if (KeyState.get(RIGHT)) {
+        this.rad -= 0.1;
+      }
     }
 
     // deceleration
@@ -94,7 +97,7 @@ class Ship {
   }
 
   boolean fire() {
-    boolean ret = (isAlive && KeyState.get(DOWN) && millis() - this.previousFireTime > this.chargeTime);
+    boolean ret = (this.isAlive && KeyState.get(DOWN) && millis() - this.previousFireTime > this.chargeTime);
     if (ret) {
       this.previousFireTime = millis();
     }

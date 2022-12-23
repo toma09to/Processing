@@ -29,7 +29,7 @@ class Bullet {
     return (this.posX >= -60 && this.posX <= width+60  && this.posY >= -60 && this.posY <= height+60);
   }
 
-  boolean isHit(float x, float y) {
-    return (pow(this.posX - x, 2) + pow(this.posY - y, 2) < pow(10.0, 2));
+  boolean isHit(Ship ship) {
+    return (pow(this.posX - ship.posX, 2) + pow(this.posY - ship.posY, 2) < pow(12.0, 2));
   }
 }
