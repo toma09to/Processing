@@ -32,4 +32,8 @@ class Bullet {
   boolean isHit(Ship ship) {
     return (pow(this.posX - ship.posX, 2) + pow(this.posY - ship.posY, 2) < pow(12.0, 2));
   }
+
+  String data() {
+    return "Bullet," + str(this.posX) + ',' + str(this.posY) + ',' + str(this.rad) + ',' + hex(this.bulletColor) + ',';
+  }
 }

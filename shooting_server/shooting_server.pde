@@ -5,7 +5,7 @@ boolean keyLeft, keyRight, keyUp, keyDown;
 PFont f;
 color green = color(0, 255, 0);
 color red = color(255, 0, 0);
-Ship myShip = new Ship(300, 300, PI/2, red);
+Ship myShip = new Ship(300, 300, PI/2, green);
 ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 int previousAliveTime = -1000;
 int previousAliveTime2 = -1000;
@@ -28,7 +28,9 @@ void setup() {
 void draw() {
   background(0);
   if (myShip.fire()) {
-    bullets.add(new Bullet(myShip.headX(), myShip.headY(), myShip.rad, green));
+    Bullet b = new Bullet(myShip.headX(), myShip.headY(), myShip.rad, green);
+    server.write(b.data());
+    bullets.add(b);
   }
 
   for (int i = 0; i < bullets.size(); i++) {

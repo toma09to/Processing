@@ -70,5 +70,8 @@ void clientEvent(Client c) {
     test.rad = float(data[3]);
     test.isAccelerating = boolean(data[4]);
     test.shipColor = unhex(data[5]);
+  } else if (data[1].equals("Bullet")) {
+    Bullet b = new Bullet(float(data[1]), float(data[2]), float(data[3]), unhex(data[4]));
+    bullets.add(b);
   }
 }
