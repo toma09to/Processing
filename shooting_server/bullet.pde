@@ -1,39 +1,45 @@
 class Bullet {
-  float posX, posY;
+  Vector pos;
   float rad;
   float speed;
   color bulletColor;
 
-  Bullet(float posX, float posY, float rad, color col) {
-    this.posX = posX;
-    this.posY = posY;
+  Bullet(Ship ship) {
+    this.pos = ship.head();
+    this.rad = ship.rad;
+    this.speed = 5.0;
+    this.bulletColor = ship.shipColor;
+  }
+
+  Bullet(color col, float x, float y, float rad) {
+    this.pos = new Vector(x, y);
     this.rad = rad;
     this.speed = 5.0;
     this.bulletColor = col;
   }
 
   void move() {
-    this.posX += speed * cos(this.rad);
-    this.posY -= speed * sin(this.rad);
+    Vector movement = new Vector(5.0, 0).rotate(this.rad);
+    this.pos.add(movement);
   }
 
   void render() {
     noStroke();
     fill(this.bulletColor);
-    ellipse(this.posX, this.posY, 5, 5);
+    ellipse(this.pos.windowX(), this.pos.windowY(), 5, 5);
     noFill();
     stroke(green);
   }
     
   boolean isAlive() {
-    return (this.posX >= -60 && this.posX <= width+60  && this.posY >= -60 && this.posY <= height+60);
+    return (this.pos.x >= -width/2 - 60 && this.pos.x <= width/2 + 60 && this.pos.y >= -height/2 - 60 && this.pos.y <= height/2 + 60);
   }
 
   boolean isHit(Ship ship) {
-    return (pow(this.posX - ship.posX, 2) + pow(this.posY - ship.posY, 2) < pow(12.0, 2));
+    return (this.pos.dist(ship.pos) < 12.0);
   }
 
   String data() {
-    return "Bullet," + str(this.posX) + ',' + str(this.posY) + ',' + str(this.rad) + ',' + hex(this.bulletColor) + ',';
+    return "Bullet," + hex(this.bulletColor) + ',' + str(this.pos.x) + ',' + str(this.pos.y) + ',' + str(this.rad);
   }
 }

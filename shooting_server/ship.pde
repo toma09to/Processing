@@ -1,7 +1,8 @@
 class Ship {
-  float posX, posY;
+  int id;
+  Vector pos;
   float rad;
-  float speedX, speedY;
+  Vector speed;
   float accelFactor, decelFactor;
   boolean isAccelerating;
   int chargeTime;
@@ -9,16 +10,15 @@ class Ship {
   boolean isAlive;
   color shipColor;
   
-  Ship(float posX, float posY, float rad, color col) {
-    this.posX = posX;
-    this.posY = posY;
+  Ship(int id, float posX, float posY, float rad, color col) {
+    this.id = id;
+    this.pos = new Vector(posX, posY);
     this.rad = rad;
-    this.speedX = 0.0;
-    this.speedY = 0.0;
+    this.speed = new Vector(0.0, 0.0);
     this.accelFactor = 0.03;
     this.decelFactor = 0.005;
     this.isAccelerating = false;
-    this.chargeTime = 500;
+    this.chargeTime = 100;
     this.previousFireTime = -this.chargeTime;
     this.isAlive = true;
     this.shipColor = col;
@@ -26,50 +26,54 @@ class Ship {
   
   void render() {
     stroke(this.shipColor);
-    PVector[] frames = new PVector[4];
-    frames[0] = new PVector(15.0,  0.0);
-    frames[1] = new PVector(-15.0, 10.0);
-    frames[2] = new PVector(-5.0,  0.0);
-    frames[3] = new PVector(-15.0, -10.0);
-    PVector[] flares = new PVector[4];
-    flares[0] = new PVector(-15.0, 7.0);
-    flares[1] = new PVector(-22.0, 7.0);
-    flares[2] = new PVector(-15.0, -7.0);
-    flares[3] = new PVector(-22.0, -7.0);
+    Vector coord = new Vector();
+
+    Vector[] frames = new Vector[4];
+    frames[0] = new Vector(15.0,  0.0);
+    frames[1] = new Vector(-15.0, 10.0);
+    frames[2] = new Vector(-5.0,  0.0);
+    frames[3] = new Vector(-15.0, -10.0);
+    Vector[] flares = new Vector[4];
+    flares[0] = new Vector(-15.0, 7.0);
+    flares[1] = new Vector(-22.0, 7.0);
+    flares[2] = new Vector(-15.0, -7.0);
+    flares[3] = new Vector(-22.0, -7.0);
 
     // draw a frame
     beginShape();
     for (int i = 0; i < 4; i++) {
       // move and rotate vector
-      float coordX = (frames[i].x*cos(this.rad) + frames[i].y*sin(this.rad)) + this.posX;
-      float coordY = (-frames[i].x*sin(this.rad) + frames[i].y*cos(this.rad)) + this.posY;
-      vertex(coordX, coordY);
+      coord.set(frames[i].x, frames[i].y).rotate(this.rad).add(this.pos);
+      vertex(coord.windowX(), coord.windowY());
     }
-    ellipse(this.posX, this.posY, 10, 10);
+    ellipse(this.pos.windowX(), this.pos.windowY(), 10, 10);
     endShape(CLOSE);
 
     // draw flares
     if (this.isAccelerating) {
       for (int i = 0; i < 4; i++) {
-        float coordX = (flares[i].x*cos(this.rad) + flares[i].y*sin(this.rad)) + this.posX;
-        float coordY = (-flares[i].x*sin(this.rad) + flares[i].y*cos(this.rad)) + this.posY;
+        coord.set(flares[i].x, flares[i].y).rotate(this.rad).add(this.pos);
         if (i % 2 == 0) beginShape();
-        vertex(coordX, coordY);
+        vertex(coord.windowX(), coord.windowY());
         if (i % 2 == 1) endShape(CLOSE);
       }
     }
     stroke(green);
   }
   
-  void move() {
+  void control() {
     this.isAccelerating = KeyState.get(UP);
     if (this.isAlive) {
+      Vector deltaSpeed = new Vector();
       // acceleration
       if (KeyState.get(UP)) {
-        speedX += accelFactor*cos(this.rad);
-        speedY -= accelFactor*sin(this.rad);
+        deltaSpeed.set(accelFactor, 0).rotate(this.rad);
+        this.speed.add(deltaSpeed);
       }
   
+      // deceleration
+      this.speed.scale(1 - decelFactor);
+
       // rotate
       if (KeyState.get(LEFT)) {
         this.rad += 0.1;
@@ -79,24 +83,25 @@ class Ship {
       }
     }
 
-    // deceleration
-    this.speedX -= this.speedX * decelFactor;
-    this.speedY -= this.speedY * decelFactor;
-
     // move
-    this.posX += this.speedX;
-    this.posY += this.speedY;
+    this.pos.add(this.speed);
 
-    if (this.posX > width + 15) {
-      this.posX -= width + 30;
-    } else if (this.posX < -15) {
-      this.posX += width + 30;
+    if (this.pos.x > width/2 + 15) {
+      this.pos.x -= width + 30;
+    } else if (this.pos.x < -width/2 - 15) {
+      this.pos.x += width + 30;
     }
-    if (this.posY > height + 15) {
-      this.posY -= height + 30;
-    } else if (this.posY < -15) {
-      this.posY += height + 30;
+    if (this.pos.y > height/2 + 15) {
+      this.pos.y -= height + 30;
+    } else if (this.pos.y < -height/2 - 15) {
+      this.pos.y += height + 30;
     }
+  }
+
+  void move(float x, float y, float rad, boolean isAccelerating) {
+    this.pos.set(x, y);
+    this.rad = rad;
+    this.isAccelerating = isAccelerating;
   }
 
   boolean fire() {
@@ -107,20 +112,25 @@ class Ship {
     return ret;
   }
 
+  Vector head() {
+    Vector head = new Vector(15.0, 0);
+    head.rotate(this.rad).add(this.pos);
+
+    return head;
+  }
+
   float headX() {
-    return 15.0*cos(this.rad) + this.posX;
+    return 15.0*cos(this.rad) + this.pos.x;
   }
 
   float headY() {
-    return 15.0*-sin(this.rad) + this.posY;
+    return 15.0*-sin(this.rad) + this.pos.y;
   }
 
   void reset(float posX, float posY, float rad) {
-    this.posX = posX;
-    this.posY = posY;
+    this.pos.set(posX, posY);
     this.rad = rad;
-    this.speedX = 0.0;
-    this.speedY = 0.0;
+    this.speed.set(0.0, 0.0);
     this.accelFactor = 0.03;
     this.decelFactor = 0.005;
     this.chargeTime = 500;
@@ -129,6 +139,6 @@ class Ship {
   }
   
   String data() {
-    return "Ship," + str(this.posX) + ',' + str(this.posY) + ',' + str(this.rad) + ',' + str(this.isAccelerating) + ',' + hex(this.shipColor) + ',';
+    return "Ship," + ',' + str(this.id) + str(this.pos.x) + ',' + str(this.pos.y) + ',' + str(this.rad) + ',' + str(this.isAccelerating);
   }
 }

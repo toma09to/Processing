@@ -1,17 +1,17 @@
 import processing.net.*;
 Client myClient;
 
-boolean keyLeft, keyRight, keyUp, keyDown;
+boolean isConnected = false;
+int lastRequestTime = -1000;
+float idNum;
+
+int myID;
+boolean isPlaying = false;
 PFont f;
 color green = color(0, 255, 0);
 color red = color(255, 0, 0);
-Ship test = new Ship(300, 300, PI/2, green);
-Ship test2 = new Ship(100, 100, PI/2, red);
+ArrayList<Ship> ships = new ArrayList<Ship>();
 ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-int previousAliveTime = -1000;
-int previousAliveTime2 = -1000;
-int maxLives = 3;
-int lives;
 
 void setup() {
   myClient = new Client(this, "127.0.0.1", 20000);
@@ -19,59 +19,70 @@ void setup() {
   size(600,600);
   background(0);
   ellipseMode(CENTER);
-  stroke(0, 255, 0);
+  stroke(green);
   noFill();
+
   f = createFont("Arial", 16, true);
   textFont(f);
+
   KeyState.initialize();
-  lives = maxLives;
 }
 
 void draw() {
-  background(0);
-  if (test.fire()) {
-    bullets.add(new Bullet(test.headX(), test.headY(), test.rad, green));
-  }
-  if (test2.fire()) {
-    bullets.add(new Bullet(test2.headX(), test2.headY(), test2.rad, red));
-  }
-
-  for (int i = 0; i < bullets.size(); i++) {
-    Bullet b = bullets.get(i);
-    b.move();
-    if (b.isAlive()) {
-      b.render();
-      if (b.isHit(test)) {
-        test.isAlive = false;
-      }
-      if (b.isHit(test2)) {
-        test2.isAlive = false;
+  if (!isPlaying) {
+    // entry scene
+    if (!isConnected) {
+      if (millis() - lastRequestTime > 1000) {
+        idNum = random(Float.MAX_VALUE);
+        myClient.write("JoinReq," + str(idNum));
+        lastRequestTime = millis();
       }
     } else {
-      bullets.remove(i);
-      i -= 1;
+      ships.add(new Ship(0, 0, 0, 0, green));
+      ships.add(new Ship(myID, -100, -100, 0, red));
+      isPlaying = true;
     }
-  }
+  } else {
+    // play scene
+    Ship myShip = ships.get(myID);
+    background(0);
 
-  if (test2.isAlive) {
-    test2.move();
+    for (int i = 0; i < bullets.size(); i++) {
+      Bullet b = bullets.get(i);
+      b.move();
+      if (b.isAlive()) {
+        b.render();
+        if (b.isHit(myShip)) {
+          myShip.isAlive = false;
+        }
+      } else {
+        bullets.remove(i);
+        i -= 1;
+      }
+    }
+
+    myShip.control();
+    myShip.render();
   }
-  test.render();
-  test2.render();
 }
 
 void clientEvent(Client c) {
   String readStr = c.readString();
-  println(readStr);
   String[] data = split(readStr, ',');
+  println("Client: " + readStr);
+
   if (data[0].equals("Ship")) {
-    test.posX = float(data[1]);
-    test.posY = float(data[2]);
-    test.rad = float(data[3]);
-    test.isAccelerating = boolean(data[4]);
-    test.shipColor = unhex(data[5]);
-  } else if (data[1].equals("Bullet")) {
-    Bullet b = new Bullet(float(data[1]), float(data[2]), float(data[3]), unhex(data[4]));
-    bullets.add(b);
+    if (int(data[1]) != myID) {
+      Ship ship = ships.get(int(data[1]));
+      ship.move(float(data[2]), float(data[3]), float(data[4]), boolean(data[5]));
+    }
+  } else if (data[0].equals("Bullet")) {
+    bullets.add(new Bullet(unhex(data[1]), float(data[2]), float(data[3]), float(data[4])));
+  } else if (data[0].equals("Join")) {
+    if (float(data[1]) == idNum) {
+      myClient.write("Joined");
+      myID = int(data[2]);
+      isConnected = true;
+    }
   }
 }
