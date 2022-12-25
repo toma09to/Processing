@@ -2,7 +2,8 @@ import processing.net.*;
 Server server;
 
 boolean isPlaying = false;
-int id = 1;
+int entry = 1;
+int ready = 1;
 PFont f;
 
 color green = color(0, 255, 0);
@@ -34,7 +35,7 @@ void setup() {
   KeyState.initialize();
 
   for (int i = 0; i < 4; i++) {
-    ships.add(new Ship(i, 0, 0, 0, colorList[i]));
+    ships.add(new Ship(i, -150 + 100*i, 0, PI/2, colorList[i]));
   }
 }
 
@@ -54,9 +55,13 @@ void draw() {
           bullets.add(new Bullet(int(data[1]), unhex(data[2]), float(data[3]), float(data[4]), float(data[5])));
           server.write(readStr);
         } else if (data[0].equals("JoinReq")) {
-          server.write("Join," + data[1] + ',' + str(id) + ',');
+          server.write("Join," + data[1] + ',' + str(entry) + ',');
         } else if (data[0].equals("Joined")) {
-          id += 1;
+          entry += 1;
+        } else if (data[0].equals("Ready")) {
+          ready += 1;
+        } else if (data[0].equals("NotReady")) {
+          ready -= 1;
         }
       } catch (NullPointerException e) {
         e.printStackTrace();
@@ -64,19 +69,25 @@ void draw() {
     }
   }
 
+  background(0);
   if (!isPlaying) {
     // entry scene
-    ships.get(0).entry();
-    ships.get(1).entry();
-    ships.get(2).entry();
-    ships.get(3).entry();
-    isPlaying = true;
-    
-    // debug
+    for (int i = 0; i < entry; i++) {
+      ships.get(i).render();
+    }
+    if (frameCount % 30 == 0) {
+      server.write("Entry," + str(entry));
+    }
+
+    if (KeyState.get(SPACE) && entry > 1 && ready == entry) {
+      for (int i = 0; i < entry; i++) {
+        ships.get(i).entry();
+      }
+      isPlaying = true;
+    }
   } else {
     // play scene
     Ship myShip = ships.get(0);
-    background(0);
     if (myShip.fire()) { 
       Bullet b = new Bullet(myShip);
       server.write(b.data());

@@ -4,9 +4,11 @@ Client myClient;
 boolean isConnected = false;
 int lastRequestTime = -1000;
 float idNum;
+boolean isReady = false;
 
 int myID;
 boolean isPlaying = false;
+int entry = 0;
 PFont f;
 
 color green = color(0, 255, 0);
@@ -19,7 +21,12 @@ ArrayList<Ship> ships = new ArrayList<Ship>();
 ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 
 void setup() {
-  myClient = new Client(this, "127.0.0.1", 20000);
+  try {
+    myClient = new Client(this, "127.0.0.1", 20000);
+  } catch (RuntimeException e) {
+    e.printStackTrace();
+    exit();
+  }
   
   size(600,600);
   background(0);
@@ -33,11 +40,12 @@ void setup() {
   KeyState.initialize();
 
   for (int i = 0; i < 4; i++) {
-    ships.add(new Ship(i, 0, 0, 0, colorList[i]));
+    ships.add(new Ship(i, -150 + 100*i, 0, PI/2, colorList[i]));
   }
 }
 
 void draw() {
+  background(0);
   if (!isPlaying) {
     // entry scene
     if (!isConnected) {
@@ -47,16 +55,13 @@ void draw() {
         lastRequestTime = millis();
       }
     } else {
-      ships.get(0).entry();
-      ships.get(1).entry();
-      ships.get(2).entry();
-      ships.get(3).entry();
-      isPlaying = true;
+      for (int i = 0; i < entry; i++) {
+        ships.get(i).render();
+      }
     }
   } else {
     // play scene
     Ship myShip = ships.get(myID);
-    background(0);
     if (myShip.fire()) {
       Bullet b = new Bullet(myShip);
       myClient.write(b.data());
@@ -107,6 +112,8 @@ void clientEvent(Client c) {
       myClient.write("Joined");
       myID = int(data[2]);
       isConnected = true;
+    } else if (data[0].equals("Entry")) {
+      entry = int(data[1]);
     }
   } catch (NullPointerException e) {
     e.printStackTrace();
