@@ -1,17 +1,20 @@
 class Bullet {
+  int id;
   Vector pos;
   float rad;
   float speed;
   color bulletColor;
 
   Bullet(Ship ship) {
+    this.id = ship.id;
     this.pos = ship.head();
     this.rad = ship.rad;
     this.speed = 5.0;
     this.bulletColor = ship.shipColor;
   }
 
-  Bullet(color col, float x, float y, float rad) {
+  Bullet(int id, color col, float x, float y, float rad) {
+    this.id = id;
     this.pos = new Vector(x, y);
     this.rad = rad;
     this.speed = 5.0;
@@ -40,6 +43,6 @@ class Bullet {
   }
 
   String data() {
-    return "Bullet," + hex(this.bulletColor) + ',' + str(this.pos.x) + ',' + str(this.pos.y) + ',' + str(this.rad);
+    return "Bullet," + str(this.id) + ',' + hex(this.bulletColor) + ',' + str(this.pos.x) + ',' + str(this.pos.y) + ',' + str(this.rad) + ',';
   }
 }

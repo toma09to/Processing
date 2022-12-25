@@ -8,6 +8,7 @@ class Ship {
   int chargeTime;
   int previousFireTime;
   boolean isAlive;
+  int maxLives, lives;
   color shipColor;
   
   Ship(int id, float posX, float posY, float rad, color col) {
@@ -20,7 +21,9 @@ class Ship {
     this.isAccelerating = false;
     this.chargeTime = 100;
     this.previousFireTime = -this.chargeTime;
-    this.isAlive = true;
+    this.isAlive = false;
+    this.maxLives = 3;
+    this.lives = 0;
     this.shipColor = col;
   }
   
@@ -60,6 +63,11 @@ class Ship {
     }
     stroke(green);
   }
+
+  void entry() {
+    this.isAlive = true;
+    this.lives = this.maxLives;
+  }
   
   void control() {
     this.isAccelerating = KeyState.get(UP);
@@ -98,10 +106,12 @@ class Ship {
     }
   }
 
-  void move(float x, float y, float rad, boolean isAccelerating) {
+  void move(float x, float y, float rad, boolean isAccelerating, boolean isAlive, int lives) {
     this.pos.set(x, y);
     this.rad = rad;
     this.isAccelerating = isAccelerating;
+    this.isAlive = isAlive;
+    this.lives = lives;
   }
 
   boolean fire() {
@@ -119,26 +129,17 @@ class Ship {
     return head;
   }
 
-  float headX() {
-    return 15.0*cos(this.rad) + this.pos.x;
-  }
-
-  float headY() {
-    return 15.0*-sin(this.rad) + this.pos.y;
-  }
-
-  void reset(float posX, float posY, float rad) {
+  void respawn(float posX, float posY, float rad) {
     this.pos.set(posX, posY);
     this.rad = rad;
     this.speed.set(0.0, 0.0);
     this.accelFactor = 0.03;
     this.decelFactor = 0.005;
-    this.chargeTime = 500;
     this.previousFireTime = -this.chargeTime;
     this.isAlive = true;
   }
   
   String data() {
-    return "Ship," + ',' + str(this.id) + str(this.pos.x) + ',' + str(this.pos.y) + ',' + str(this.rad) + ',' + str(this.isAccelerating);
+    return str(this.id) + ',' + str(this.pos.x) + ',' + str(this.pos.y) + ',' + str(this.rad) + ',' + str(this.isAccelerating) + ',' + str(this.isAlive) + ',' + str(this.lives) + ',';
   }
 }
