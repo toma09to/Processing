@@ -2,6 +2,8 @@ import processing.net.*;
 Server server;
 
 boolean isPlaying = false;
+int countdown = -1;
+int lastCount = -1000;
 int entry = 1;
 int ready = 1;
 PFont f;
@@ -58,6 +60,7 @@ void draw() {
           server.write("Join," + data[1] + ',' + str(entry) + ',');
         } else if (data[0].equals("Joined")) {
           entry += 1;
+          server.write("Entry," + str(entry) + ',');
         } else if (data[0].equals("Ready")) {
           ready += 1;
         } else if (data[0].equals("NotReady")) {
@@ -75,11 +78,18 @@ void draw() {
     for (int i = 0; i < entry; i++) {
       ships.get(i).render();
     }
-    if (frameCount % 30 == 0) {
-      server.write("Entry," + str(entry));
-    }
 
     if (KeyState.get(SPACE) && entry > 1 && ready == entry) {
+      countdown = 3;
+      lastCount = millis();
+    }
+
+    if (countdown > 0 && millis() - lastCount > 1000) {
+      countdown -= 1;
+      server.write("Count," + str(countdown));
+    } 
+    if (countdown == 0) {
+      countdown = -1;
       for (int i = 0; i < entry; i++) {
         ships.get(i).entry();
       }

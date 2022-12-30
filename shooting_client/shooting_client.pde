@@ -1,6 +1,7 @@
 import processing.net.*;
 Client myClient;
 
+boolean isCompletedSetup = false;
 boolean isConnected = false;
 int lastRequestTime = -1000;
 float idNum;
@@ -42,6 +43,7 @@ void setup() {
   for (int i = 0; i < 4; i++) {
     ships.add(new Ship(i, -150 + 100*i, 0, PI/2, colorList[i]));
   }
+  isCompletedSetup = true;
 }
 
 void draw() {
@@ -94,9 +96,10 @@ void draw() {
 }
 
 void clientEvent(Client c) {
-  if (millis() <= 2000) {
+  if (!isCompletedSetup) {
     return;
   }
+
   String readStr = c.readString();
   String[] data = split(readStr, ',');
 
