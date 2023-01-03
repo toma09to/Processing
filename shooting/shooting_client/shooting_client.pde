@@ -25,9 +25,12 @@ ArrayList<Ship> ships = new ArrayList<Ship>();
 ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 
 void setup() {
+  String[] ipAddr;
+  ipAddr = loadStrings("ip.txt");
+
   try {
-    myClient = new Client(this, "127.0.0.1", 20000);
-  } catch (RuntimeException e) {
+    myClient = new Client(this, ipAddr[0], 20000);
+  } catch (NullPointerException e) {
     e.printStackTrace();
     noLoop();
   }
