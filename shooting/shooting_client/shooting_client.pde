@@ -17,7 +17,7 @@ PFont f;
 
 color green = color(0, 255, 0);
 color red = color(255, 0, 0);
-color blue = color(0, 0, 255);
+color blue = color(0, 128, 255);
 color yellow = color(255, 255, 0);
 color[] colorList = {green, red, blue, yellow};
 
